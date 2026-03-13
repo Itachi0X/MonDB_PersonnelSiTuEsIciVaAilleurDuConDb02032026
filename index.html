@@ -12,33 +12,35 @@ height:100vh;
 display:flex;
 align-items:center;
 justify-content:center;
-background:linear-gradient(135deg,#0f172a,#020617);
-font-family:Segoe UI, sans-serif;
+background:linear-gradient(135deg,#020617,#0f172a);
+font-family:Segoe UI,sans-serif;
 color:white;
 overflow:hidden;
 }
 
 .container{
-width:420px;
+width:480px;
 padding:30px;
 border-radius:20px;
 background:rgba(255,255,255,0.05);
-backdrop-filter:blur(10px);
+backdrop-filter:blur(12px);
 border:1px solid rgba(255,255,255,0.1);
+box-shadow:0 20px 60px rgba(0,0,0,0.7);
 text-align:center;
-box-shadow:0 20px 60px rgba(0,0,0,0.6);
 }
 
 img{
 width:100%;
+height:220px;
+object-fit:cover;
 border-radius:12px;
 margin-bottom:15px;
 }
 
-.fact{
-font-size:16px;
-min-height:50px;
-opacity:0.9;
+.text{
+min-height:60px;
+font-size:17px;
+line-height:1.4;
 }
 
 .progress{
@@ -53,23 +55,6 @@ overflow:hidden;
 height:100%;
 width:0%;
 background:linear-gradient(90deg,#38bdf8,#6366f1,#a855f7);
-transition:width 0.3s;
-}
-
-.game{
-margin-top:15px;
-font-size:14px;
-opacity:0.8;
-}
-
-button{
-margin-top:10px;
-padding:6px 12px;
-border:none;
-border-radius:8px;
-background:#38bdf8;
-color:white;
-cursor:pointer;
 }
 
 </style>
@@ -79,17 +64,9 @@ cursor:pointer;
 
 <div class="container">
 
-<img id="randomImage">
+<img id="img">
 
-<div class="fact" id="fact"></div>
-
-<div class="game">
-🎮 Clique pour gagner des points pendant le chargement  
-<br>
-Score: <span id="score">0</span>
-<br>
-<button onclick="addScore()">Clique moi</button>
-</div>
+<div class="text" id="text"></div>
 
 <div class="progress">
 <div class="bar" id="bar"></div>
@@ -99,62 +76,92 @@ Score: <span id="score">0</span>
 
 <script>
 
-const facts = [
-"🐙 Les pieuvres ont 3 cœurs.",
-"🚀 L'espace est complètement silencieux.",
-"🧠 Le cerveau humain contient ~86 milliards de neurones.",
-"🐧 Les manchots peuvent boire de l'eau salée.",
-"⚡ Un éclair est 5 fois plus chaud que le soleil.",
-"🌍 La Terre tourne à 1670 km/h.",
-"🐢 Certaines tortues peuvent vivre plus de 150 ans.",
-"🍯 Le miel ne périme jamais."
+/* génération quasi infinie */
+
+const subjects = [
+"Les développeurs","Les chats","Les robots","Les astronautes",
+"Les hackers","Les tortues","Les intelligences artificielles",
+"Les explorateurs","Les scientifiques","Les gamers"
 ];
 
-const images = [
-"https://source.unsplash.com/random/600x400?nature",
-"https://source.unsplash.com/random/600x400?space",
-"https://source.unsplash.com/random/600x400?technology",
-"https://source.unsplash.com/random/600x400?gaming",
-"https://source.unsplash.com/random/600x400?cyberpunk"
+const verbs = [
+"peuvent créer","ont découvert","utilisent","adorent",
+"testent","construisent","imaginent","analysent"
 ];
 
-function randomContent(){
-document.getElementById("fact").innerText =
-facts[Math.floor(Math.random()*facts.length)];
+const objects = [
+"des univers virtuels","des planètes inconnues",
+"des algorithmes incroyables","des mondes générés",
+"des jeux impossibles","des technologies futuristes",
+"des machines intelligentes"
+];
 
-document.getElementById("randomImage").src =
-images[Math.floor(Math.random()*images.length)];
+const endings = [
+"pendant que le système charge.",
+"avant que le chargement se termine.",
+"pendant que les données arrivent.",
+"pendant l'initialisation du moteur.",
+"pendant la compilation du monde."
+];
+
+const themes = [
+"space","technology","cyberpunk","ai","nature",
+"gaming","robot","future","galaxy"
+];
+
+/* phrase aléatoire */
+
+function randomText(){
+
+let text =
+subjects[Math.floor(Math.random()*subjects.length)]+" "+
+verbs[Math.floor(Math.random()*verbs.length)]+" "+
+objects[Math.floor(Math.random()*objects.length)]+" "+
+endings[Math.floor(Math.random()*endings.length)];
+
+document.getElementById("text").innerText = text;
+
+/* image random */
+
+let theme = themes[Math.floor(Math.random()*themes.length)];
+
+document.getElementById("img").src =
+"https://source.unsplash.com/random/800x600?"+theme;
+
+/* durée dépend de la longueur */
+
+let duration = Math.max(8000, text.length * 80);
+
+startProgress(duration);
+
 }
-
-randomContent();
-setInterval(randomContent,4000);
 
 /* progression */
 
-let progress = 0;
+function startProgress(duration){
 
-let interval = setInterval(()=>{
+let bar = document.getElementById("bar");
+bar.style.transition = "none";
+bar.style.width = "0%";
 
-progress += Math.random()*8;
+setTimeout(()=>{
+bar.style.transition = duration+"ms linear";
+bar.style.width = "100%";
+},50);
 
-if(progress >=100){
-progress =100;
-clearInterval(interval);
-document.getElementById("fact").innerText="✅ Chargement terminé !";
 }
 
-document.getElementById("bar").style.width = progress + "%";
+/* changement aléatoire */
 
-},500);
+randomText();
 
-/* mini jeu */
+setInterval(()=>{
 
-let score = 0;
-
-function addScore(){
-score++;
-document.getElementById("score").innerText = score;
+if(Math.random()>0.5){
+randomText();
 }
+
+},4000);
 
 </script>
 
