@@ -2,89 +2,74 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Chargement</title>
+<title>Chargement...</title>
 
 <style>
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family: "Segoe UI", sans-serif;
-}
-
 body{
+margin:0;
 height:100vh;
 display:flex;
-justify-content:center;
 align-items:center;
-background: linear-gradient(135deg,#0f172a,#1e293b,#020617);
+justify-content:center;
+background:linear-gradient(135deg,#0f172a,#020617);
+font-family:Segoe UI, sans-serif;
+color:white;
 overflow:hidden;
 }
 
-/* container */
-
-.loader-box{
-text-align:center;
-padding:40px 60px;
+.container{
+width:420px;
+padding:30px;
 border-radius:20px;
 background:rgba(255,255,255,0.05);
-backdrop-filter: blur(10px);
+backdrop-filter:blur(10px);
 border:1px solid rgba(255,255,255,0.1);
-box-shadow:0 20px 50px rgba(0,0,0,0.6);
+text-align:center;
+box-shadow:0 20px 60px rgba(0,0,0,0.6);
 }
 
-/* spinner moderne */
-
-.spinner{
-width:80px;
-height:80px;
-border-radius:50%;
-background:conic-gradient(
-#38bdf8,
-#6366f1,
-#a855f7,
-#38bdf8
-);
-animation:spin 1.4s linear infinite;
-margin:auto;
-position:relative;
+img{
+width:100%;
+border-radius:12px;
+margin-bottom:15px;
 }
 
-.spinner::before{
-content:"";
-position:absolute;
-inset:8px;
-background:#020617;
-border-radius:50%;
+.fact{
+font-size:16px;
+min-height:50px;
+opacity:0.9;
 }
 
-/* animation */
-
-@keyframes spin{
-100%{ transform:rotate(360deg); }
+.progress{
+margin-top:20px;
+height:8px;
+background:rgba(255,255,255,0.1);
+border-radius:20px;
+overflow:hidden;
 }
 
-/* texte */
+.bar{
+height:100%;
+width:0%;
+background:linear-gradient(90deg,#38bdf8,#6366f1,#a855f7);
+transition:width 0.3s;
+}
 
-.loading-text{
-margin-top:25px;
-font-size:18px;
+.game{
+margin-top:15px;
+font-size:14px;
+opacity:0.8;
+}
+
+button{
+margin-top:10px;
+padding:6px 12px;
+border:none;
+border-radius:8px;
+background:#38bdf8;
 color:white;
-letter-spacing:2px;
-}
-
-.dots::after{
-content:"";
-animation:dots 1.5s steps(4,end) infinite;
-}
-
-@keyframes dots{
-0%{content:"";}
-25%{content:".";}
-50%{content:"..";}
-75%{content:"...";}
-100%{content:"";}
+cursor:pointer;
 }
 
 </style>
@@ -92,15 +77,86 @@ animation:dots 1.5s steps(4,end) infinite;
 
 <body>
 
-<div class="loader-box">
+<div class="container">
 
-<div class="spinner"></div>
+<img id="randomImage">
 
-<div class="loading-text">
-Chargement<span class="dots"></span>
+<div class="fact" id="fact"></div>
+
+<div class="game">
+🎮 Clique pour gagner des points pendant le chargement  
+<br>
+Score: <span id="score">0</span>
+<br>
+<button onclick="addScore()">Clique moi</button>
+</div>
+
+<div class="progress">
+<div class="bar" id="bar"></div>
 </div>
 
 </div>
+
+<script>
+
+const facts = [
+"🐙 Les pieuvres ont 3 cœurs.",
+"🚀 L'espace est complètement silencieux.",
+"🧠 Le cerveau humain contient ~86 milliards de neurones.",
+"🐧 Les manchots peuvent boire de l'eau salée.",
+"⚡ Un éclair est 5 fois plus chaud que le soleil.",
+"🌍 La Terre tourne à 1670 km/h.",
+"🐢 Certaines tortues peuvent vivre plus de 150 ans.",
+"🍯 Le miel ne périme jamais."
+];
+
+const images = [
+"https://source.unsplash.com/random/600x400?nature",
+"https://source.unsplash.com/random/600x400?space",
+"https://source.unsplash.com/random/600x400?technology",
+"https://source.unsplash.com/random/600x400?gaming",
+"https://source.unsplash.com/random/600x400?cyberpunk"
+];
+
+function randomContent(){
+document.getElementById("fact").innerText =
+facts[Math.floor(Math.random()*facts.length)];
+
+document.getElementById("randomImage").src =
+images[Math.floor(Math.random()*images.length)];
+}
+
+randomContent();
+setInterval(randomContent,4000);
+
+/* progression */
+
+let progress = 0;
+
+let interval = setInterval(()=>{
+
+progress += Math.random()*8;
+
+if(progress >=100){
+progress =100;
+clearInterval(interval);
+document.getElementById("fact").innerText="✅ Chargement terminé !";
+}
+
+document.getElementById("bar").style.width = progress + "%";
+
+},500);
+
+/* mini jeu */
+
+let score = 0;
+
+function addScore(){
+score++;
+document.getElementById("score").innerText = score;
+}
+
+</script>
 
 </body>
 </html>
