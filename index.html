@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Chargement...</title>
+<title>Chargement intelligent</title>
 
 <style>
 
@@ -15,11 +15,10 @@ justify-content:center;
 background:linear-gradient(135deg,#020617,#0f172a);
 font-family:Segoe UI,sans-serif;
 color:white;
-overflow:hidden;
 }
 
 .container{
-width:480px;
+width:500px;
 padding:30px;
 border-radius:20px;
 background:rgba(255,255,255,0.05);
@@ -38,7 +37,7 @@ margin-bottom:15px;
 }
 
 .text{
-min-height:60px;
+min-height:70px;
 font-size:17px;
 line-height:1.4;
 }
@@ -66,7 +65,7 @@ background:linear-gradient(90deg,#38bdf8,#6366f1,#a855f7);
 
 <img id="img">
 
-<div class="text" id="text"></div>
+<div class="text" id="text">Chargement...</div>
 
 <div class="progress">
 <div class="bar" id="bar"></div>
@@ -76,92 +75,114 @@ background:linear-gradient(90deg,#38bdf8,#6366f1,#a855f7);
 
 <script>
 
-/* génération quasi infinie */
+/* IMAGE RANDOM (toujours fonctionnelle) */
 
-const subjects = [
-"Les développeurs","Les chats","Les robots","Les astronautes",
-"Les hackers","Les tortues","Les intelligences artificielles",
-"Les explorateurs","Les scientifiques","Les gamers"
-];
+function loadImage(){
 
-const verbs = [
-"peuvent créer","ont découvert","utilisent","adorent",
-"testent","construisent","imaginent","analysent"
-];
+document.getElementById("img").src =
+"https://picsum.photos/800/400?random=" + Math.random();
 
-const objects = [
-"des univers virtuels","des planètes inconnues",
-"des algorithmes incroyables","des mondes générés",
-"des jeux impossibles","des technologies futuristes",
-"des machines intelligentes"
-];
+}
 
-const endings = [
-"pendant que le système charge.",
-"avant que le chargement se termine.",
-"pendant que les données arrivent.",
-"pendant l'initialisation du moteur.",
-"pendant la compilation du monde."
-];
+/* API météo réelle */
 
-const themes = [
-"space","technology","cyberpunk","ai","nature",
-"gaming","robot","future","galaxy"
-];
+async function getWeather(){
 
-/* phrase aléatoire */
+try{
 
-function randomText(){
+let res = await fetch(
+"https://api.open-meteo.com/v1/forecast?latitude=43.2965&longitude=5.3698&current_weather=true"
+);
 
-let text =
-subjects[Math.floor(Math.random()*subjects.length)]+" "+
-verbs[Math.floor(Math.random()*verbs.length)]+" "+
-objects[Math.floor(Math.random()*objects.length)]+" "+
-endings[Math.floor(Math.random()*endings.length)];
+let data = await res.json();
+
+return "🌡 Température actuelle : " + data.current_weather.temperature + "°C";
+
+}catch{
+
+return "🌡 Impossible de récupérer la météo.";
+
+}
+
+}
+
+/* API info wikipedia */
+
+async function getWiki(){
+
+try{
+
+let res = await fetch(
+"https://fr.wikipedia.org/api/rest_v1/page/random/summary"
+);
+
+let data = await res.json();
+
+return "📚 " + data.extract;
+
+}catch{
+
+return "📚 Impossible de récupérer une info Wikipédia.";
+
+}
+
+}
+
+/* choix aléatoire */
+
+async function randomInfo(){
+
+let type = Math.random();
+
+if(type < 0.5){
+
+return await getWeather();
+
+}else{
+
+return await getWiki();
+
+}
+
+}
+
+/* chargement dynamique */
+
+async function startLoader(){
+
+loadImage();
+
+let text = await randomInfo();
 
 document.getElementById("text").innerText = text;
 
-/* image random */
+/* durée dépend du texte */
 
-let theme = themes[Math.floor(Math.random()*themes.length)];
-
-document.getElementById("img").src =
-"https://source.unsplash.com/random/800x600?"+theme;
-
-/* durée dépend de la longueur */
-
-let duration = Math.max(8000, text.length * 80);
-
-startProgress(duration);
-
-}
-
-/* progression */
-
-function startProgress(duration){
+let duration = Math.max(8000, text.length * 60);
 
 let bar = document.getElementById("bar");
-bar.style.transition = "none";
-bar.style.width = "0%";
 
 setTimeout(()=>{
-bar.style.transition = duration+"ms linear";
+
+bar.style.transition = duration + "ms linear";
 bar.style.width = "100%";
+
 },50);
 
-}
+/* nouvelle info pendant le chargement */
 
-/* changement aléatoire */
+setTimeout(async()=>{
 
-randomText();
+loadImage();
 
-setInterval(()=>{
-
-if(Math.random()>0.5){
-randomText();
-}
+document.getElementById("text").innerText =
+await randomInfo();
 
 },4000);
+
+}
+
+startLoader();
 
 </script>
 
