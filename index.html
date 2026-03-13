@@ -3,52 +3,65 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Loader interactif</title>
+<title>Chargement intelligent</title>
 
 <style>
 
-body{
+*{
+box-sizing:border-box;
 margin:0;
+padding:0;
+font-family:Segoe UI,sans-serif;
+}
+
+body{
 height:100vh;
 display:flex;
 align-items:center;
 justify-content:center;
-background:linear-gradient(135deg,#020617,#0f172a);
-font-family:Segoe UI,sans-serif;
+background:radial-gradient(circle at top,#0f172a,#020617);
 color:white;
-cursor:pointer;
+overflow:hidden;
 }
 
 .container{
-width:520px;
-padding:30px;
-border-radius:20px;
+width:560px;
+padding:35px;
+border-radius:22px;
 background:rgba(255,255,255,0.05);
-backdrop-filter:blur(12px);
+backdrop-filter:blur(14px);
 border:1px solid rgba(255,255,255,0.1);
-box-shadow:0 20px 60px rgba(0,0,0,0.7);
+box-shadow:0 30px 80px rgba(0,0,0,0.8);
 text-align:center;
+cursor:pointer;
+transition:transform .2s;
+}
+
+.container:hover{
+transform:scale(1.02);
 }
 
 img{
 width:100%;
-height:220px;
+height:240px;
 object-fit:cover;
-border-radius:12px;
+border-radius:14px;
 margin-bottom:15px;
+transition:opacity .4s;
 }
 
 .text{
-min-height:80px;
+min-height:90px;
 font-size:17px;
-line-height:1.5;
+line-height:1.6;
+opacity:0.95;
 }
 
 .progress{
-margin-top:20px;
-height:8px;
+margin-top:22px;
+height:10px;
 background:rgba(255,255,255,0.1);
-border-radius:20px;
+border-radius:30px;
 overflow:hidden;
 }
 
@@ -56,12 +69,13 @@ overflow:hidden;
 height:100%;
 width:0%;
 background:linear-gradient(90deg,#38bdf8,#6366f1,#a855f7);
+box-shadow:0 0 10px #38bdf8;
 }
 
-.hint{
+.footer{
+margin-top:12px;
 font-size:13px;
 opacity:0.6;
-margin-top:10px;
 }
 
 </style>
@@ -74,89 +88,117 @@ margin-top:10px;
 <img id="img">
 
 <div class="text" id="text">
-Clique pour charger une info réelle...
+Clique pour afficher une information réelle
 </div>
 
 <div class="progress">
 <div class="bar" id="bar"></div>
 </div>
 
-<div class="hint">
-👆 Clique pour voir une nouvelle info
+<div class="footer">
+🌍 données en direct • clique pour changer
 </div>
 
 </div>
 
 <script>
 
-/* image random */
+/* IMAGE RANDOM */
 
 function loadImage(){
+
+document.getElementById("img").style.opacity=0;
+
+setTimeout(()=>{
+
 document.getElementById("img").src =
-"https://picsum.photos/800/400?random=" + Math.random();
+"https://picsum.photos/900/500?random=" + Math.random();
+
+document.getElementById("img").style.opacity=1;
+
+},200);
+
 }
 
-/* météo réelle */
+/* API météo */
 
-async function getWeather(){
+async function weather(){
 
-try{
-
-let res = await fetch(
+let r = await fetch(
 "https://api.open-meteo.com/v1/forecast?latitude=43.2965&longitude=5.3698&current_weather=true"
 );
 
-let data = await res.json();
+let d = await r.json();
 
-return "🌡 Température actuelle : " + data.current_weather.temperature + "°C";
-
-}catch{
-
-return "Impossible de récupérer la météo.";
+return "🌡 Température actuelle : " + d.current_weather.temperature + "°C";
 
 }
 
-}
+/* wikipedia */
 
-/* wikipedia random */
+async function wiki(){
 
-async function getWiki(){
-
-try{
-
-let res = await fetch(
+let r = await fetch(
 "https://fr.wikipedia.org/api/rest_v1/page/random/summary"
 );
 
-let data = await res.json();
+let d = await r.json();
 
-return "📚 " + data.title + " : " + data.extract;
-
-}catch{
-
-return "Impossible de récupérer une info Wikipédia.";
+return "📚 " + d.title + " : " + d.extract;
 
 }
 
+/* NASA */
+
+async function nasa(){
+
+let r = await fetch(
+"https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY"
+);
+
+let d = await r.json();
+
+return "🪐 NASA : " + d.title + " — " + d.explanation.substring(0,200)+"...";
+
 }
 
-/* choisir api */
+/* activité solaire */
+
+async function solar(){
+
+let r = await fetch(
+"https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json"
+);
+
+let d = await r.json();
+
+let last = d[d.length-1];
+
+return "☀️ Activité solaire : taches solaires = "+last.ssnum;
+
+}
+
+/* random API */
 
 async function randomInfo(){
 
-if(Math.random() < 0.5){
-return await getWeather();
-}else{
-return await getWiki();
+let apis=[weather,wiki,nasa,solar];
+
+let f = apis[Math.floor(Math.random()*apis.length)];
+
+try{
+return await f();
+}catch{
+return "⚠️ Impossible de récupérer une donnée.";
 }
 
 }
 
-/* progression */
+/* progression dynamique */
 
 function startProgress(text){
 
-let duration = Math.max(8000, text.length * 60);
+let duration = Math.max(8000, text.length * 55);
 
 let bar = document.getElementById("bar");
 
@@ -164,13 +206,15 @@ bar.style.transition="none";
 bar.style.width="0%";
 
 setTimeout(()=>{
-bar.style.transition = duration + "ms linear";
+
+bar.style.transition = duration+"ms linear";
 bar.style.width="100%";
-},50);
+
+},60);
 
 }
 
-/* refresh au clic */
+/* refresh */
 
 async function refreshContent(){
 
@@ -178,13 +222,13 @@ loadImage();
 
 let text = await randomInfo();
 
-document.getElementById("text").innerText = text;
+document.getElementById("text").innerText=text;
 
 startProgress(text);
 
 }
 
-/* premier chargement */
+/* start */
 
 refreshContent();
 
